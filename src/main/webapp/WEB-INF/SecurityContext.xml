@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/security
+                           http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+    <security:global-method-security secured-annotations="enabled" />
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	<property name="driverClassName" value="org.h2.Driver"/>
+	<property name="url" value="jdbc:h2:~/homedecor;;AUTO_SERVER=TRUE;"/>
+	<property name="username" value="sa"/>
+	<property name="password" value=""/>
+	</bean>
+    
+    <security:http auto-config="true">
+        <!-- Restrict URLs based on role -->
+        <security:intercept-url pattern="/**" access="permitAll or hasRole('USER') or hasRole('ADMIN')" />
+        
+        <security:intercept-url pattern="/flows/createItem" access="permitAll" method="POST" />
+        
+        <!-- Override default login and logout pages -->
+        <security:form-login login-page="/signin" 
+        					 username-parameter="username"
+        					 password-parameter="password"
+                             default-target-url="/index" 
+                             authentication-failure-url="/signin?error=1" />
+        <security:logout logout-url="/logout" logout-success-url="/index" />
+        
+         <security:csrf disabled="true"/>
+    </security:http>
+    
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<property name="packagesToScan">
+		<list>
+		<value>com.Techworld.model</value>
+		<value>com.Techworld.SupplierModel</value>
+		<value>com.Techworld.UserModel</value>
+		<value>com.Techworld.Security</value>
+		</list>
+		</property>
+		
+		</bean>
+		
+		
+	
+
+    <security:authentication-manager>
+        <security:authentication-provider >
+            
+            <security:jdbc-user-service data-source-ref="dataSource" users-by-username-query="select username,password,active from user where username=?" authorities-by-username-query="SELECT a.USERNAME,b.ROLENAME FROM USER a , ROLE b where a.ROLE = b.ROLE and a.USERNAME=?;" />
+            
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>
