@@ -11,7 +11,7 @@ The website updates the catalog when a supplier adds a new product.
 
 
 # Tools:
-Java SDK, Eclipse IDE, GitHub version control, UML
+Java SDK, Eclipse IDE, GitHub version control, UML, Maven, Apache Tomcat
 
 
 # Technologies: 
